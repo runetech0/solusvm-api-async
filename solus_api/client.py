@@ -1,11 +1,9 @@
 import json
 from typing import Optional
 import aiohttp
-
+from .exceptions import SolusAPIError
 from solus_api.models.plan import SolusPlan
 from .models.server import Server
-
-
 from .types import GeneralDict, PlanIDT
 
 
@@ -45,10 +43,13 @@ class SolusVMAPI:
             method=method, url=url, headers=self.get_headers(headers), data=data
         ) as resp:
             await resp.read()
-            print(resp.status)
+            # print(resp.status)
 
         if raw:
             return resp
+
+        if resp.status not in range(200, 299):
+            raise SolusAPIError(f"API Response: {await resp.text()}")
 
         return await resp.json()
 
@@ -112,19 +113,17 @@ class SolusVMAPI:
         self,
         server_id: int,
         os_id: int,
-        application_id: int,
-        application_data: str = "",
-    ) -> GeneralDict:
+        application_data: list[str] = [],
+    ) -> Server:
         """Reinstall a server with different os or application"""
         path = f"/servers/{server_id}/reinstall"
         payload = {
             "os": os_id,
-            "application": application_id,
             "application_data": application_data,
         }
         resp = await self._request("POST", path=path, data=payload)
         assert isinstance(resp, dict)
-        return resp
+        return Server(resp["data"])
 
     async def restart_server(self, server_id: int, force: bool = True) -> GeneralDict:
         """Restart a server"""
@@ -172,5 +171,3 @@ class SolusVMAPI:
 
         assert isinstance(resp, aiohttp.ClientResponse)
         return resp.status == 200
-
-        print(await resp.text())

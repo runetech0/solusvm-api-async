@@ -1,7 +1,8 @@
 # from pprint import pprint
 from ..types import GeneralDict
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Literal, Optional, Union
 from .plan import SolusPlan
+import datetime as dt
 
 
 class OsImage:
@@ -15,7 +16,7 @@ class OsImage:
 
 class ApplicationLoginLink:
     def __init__(self, data: Dict[str, str]):
-        print(data)
+        # print(data)
         self.type: str = data.get("type", "")
         self.content: str = data.get("content", "")
 
@@ -279,7 +280,7 @@ class Server:
         self.specifications: Dict[str, int] = data.get("specifications", {})
         self.plan = SolusPlan(data.get("plan", {}))
         self.settings: Settings = Settings(data.get("settings", {}))
-        self.status: str = data.get("status", "")
+        self.status: Literal["stopped", "started"] = data.get("status", "")
         self.real_status: str = data.get("real_status", "")
         self.virtualization_type: str = data.get("virtualization_type", "")
         self.ips: List[Ip] = [Ip(ip_data) for ip_data in data.get("ips", [])]
@@ -325,3 +326,8 @@ class Server:
 
     def get_ip(self) -> str:
         return self.ips[0].ip
+
+
+    @property
+    def created_at_ts(self) -> int:
+        return int(dt.datetime.strptime(self.created_at.split(".")[0],"%Y-%m-%dT%H:%M:%S").timestamp())
