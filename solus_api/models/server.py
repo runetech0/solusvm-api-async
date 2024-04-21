@@ -3,15 +3,9 @@ from ..types import GeneralDict
 from typing import List, Dict, Literal, Optional, Union
 from .plan import SolusPlan
 import datetime as dt
-
-
-class OsImage:
-    def __init__(self, data: Dict[str, str]):
-        self.cloud_init_version: str = data.get("cloud_init_version", "")
-        self.icon: str = data.get("icon", "")
-        self.name: str = data.get("name", "")
-        self.type: str = data.get("type", "")
-        self.url: str = data.get("url", "")
+from .os_image import OsImage
+from .iso_image import IsoImage
+from .ip_block import IpBlock
 
 
 class ApplicationLoginLink:
@@ -21,19 +15,6 @@ class ApplicationLoginLink:
         self.content: str = data.get("content", "")
 
 
-class IsoImage:
-    def __init__(self, data: GeneralDict):
-        self.name: str = data.get("name", "")
-        self.icon: str = data.get("icon", "")
-        self.os_type: str = data.get("os_type", "")
-        self.iso_url: str = data.get("iso_url", "")
-        self.use_tls: bool = data.get("use_tls", False)
-        self.checksum_method: str = data.get("checksum_method", "")
-        self.checksum: str = data.get("checksum", "")
-        self.show_url_and_checksum: bool = data.get("show_url_and_checksum", False)
-        self.show_tls: bool = data.get("show_tls", False)
-
-
 class ReverseDns:
     def __init__(self, data: GeneralDict):
         self.id: int = data.get("id", 0)
@@ -41,27 +22,6 @@ class ReverseDns:
         self.ip: str = data.get("ip", "")
         self.domain: str = data.get("domain", "")
         self.is_primary: bool = data.get("is_primary", False)
-
-
-class IpBlock:
-    def __init__(self, data: GeneralDict):
-        self.id: int = data.get("id", 0)
-        self.name: str = data.get("name", "")
-        self.gateway: str = data.get("gateway", "")
-        self.netmask: str = data.get("netmask", "")
-        self.ns_1: str = data.get("ns_1", "")
-        self.ns_2: str = data.get("ns_2", "")
-        self.from_: str = data.get(
-            "from", ""
-        )  # "from" is a reserved keyword in Python, so using "from_" instead
-        self.to: str = data.get("to", "")
-        self.type: str = data.get("type", "")
-        self.list_type: str = data.get("list_type", "")
-        self.range: int = data.get("range", 0)
-        self.subnet: int = data.get("subnet", 0)
-        self.reserved_ips_count: int = data.get("reserved_ips_count", 0)
-        self.total_ips_count: str = data.get("total_ips_count", "")
-        self.reverse_dns: Dict[str, Union[str, bool]] = data.get("reverse_dns", {})
 
 
 class Ip:
@@ -327,7 +287,10 @@ class Server:
     def get_ip(self) -> str:
         return self.ips[0].ip
 
-
     @property
     def created_at_ts(self) -> int:
-        return int(dt.datetime.strptime(self.created_at.split(".")[0],"%Y-%m-%dT%H:%M:%S").timestamp())
+        return int(
+            dt.datetime.strptime(
+                self.created_at.split(".")[0], "%Y-%m-%dT%H:%M:%S"
+            ).timestamp()
+        )
